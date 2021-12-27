@@ -20,6 +20,18 @@ class BookService {
     update(data){
         return http.put('/books',data);
     }
+
+    getLanguage(){
+        return http.get('/books/languages');
+    }
+
+    getGenre(){
+        return http.get('/books/genres');
+    }
+
+    getFilterData(search){
+        return http.get(`/books/search/${search}?&page=0&size=5`);
+    }
 }
 
 export default new BookService();

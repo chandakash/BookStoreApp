@@ -4,13 +4,18 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControl,
   Grid,
+  InputLabel,
+  OutlinedInput,
+  Select,
   TextField,
 } from "@mui/material";
 import { makeStyles } from "@mui/styles";
-import React, { useState } from "react";
-import BookService from '../services/BookService'
-import AddIcon from '@mui/icons-material/Add';
+import React, {useState } from "react";
+import BookService from "../services/BookService";
+import AddIcon from "@mui/icons-material/Add";
+import MenuItem from "@mui/material/MenuItem";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -37,7 +42,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const AddFormDialog = ({selectedData}) => {
+const AddFormDialog = ({ selectedData, genreList, languageList }) => {
   const [open, setOpen] = useState(false);
 
   const [title, setTitle] = useState("");
@@ -46,7 +51,7 @@ const AddFormDialog = ({selectedData}) => {
   const [isbn, setIsbn] = useState("");
   const [price, setPrice] = useState(0.0);
   const [language, setLanguage] = useState("English");
-  const [genre, setGenre] = useState("");
+  const [genre, setGenre] = useState("Horror");
   const [publishedDate, setPublishedDate] = useState("");
 
   const handleClickOpen = () => {
@@ -58,35 +63,47 @@ const AddFormDialog = ({selectedData}) => {
   };
 
   const handleSubmit = (event) => {
-      event.preventDefault();
+    event.preventDefault();
     var data = {
-        title : title,
-        author : author,
-        coverPhotoURL: coverPhotoUrl,
-        isbnNumber: isbn,
-        price: price,
-        language: language,
-        genre: genre,
-        publishedDate: publishedDate
-    }
+      title: title,
+      author: author,
+      coverPhotoURL: coverPhotoUrl,
+      isbnNumber: isbn,
+      price: price,
+      language: language[0],
+      genre: genre[0],
+      publishedDate: publishedDate,
+    };
     BookService.create(data)
-        .then(response => {
-            console.log(response.data)
-            handleClose();
-        })
-        .catch(e => {
-            console.log(e)
-            handleClose();
-        });
+      .then((response) => {
+        console.log(response.data);
+        handleClose();
+      })
+      .catch((e) => {
+        console.log(e);
+        handleClose();
+      });
 
     // alert("for submitted successfully");
-
   };
+
+  const handleDate = (event) => {
+    console.log("handle Date : ");
+    console.log(event.target.value);
+    setPublishedDate(event.target.value)
+  }
   const classes = useStyles();
+
   return (
     <>
-      <Button variant="outlined" color="primary" onClick={handleClickOpen} disabled={selectedData.length ? true : false}>
-        <AddIcon fontSize="small"/> Add
+      <Button
+        variant={selectedData.length === 0 ? "contained" : "outlined"}
+        color={selectedData.length === 0 ? "secondary" : "primary"}
+        onClick={handleClickOpen}
+        disabled={selectedData.length ? true : false}
+        style={{width: "500"}}
+      >
+        <AddIcon fontSize="small" /> Add
       </Button>
 
       <Dialog open={open} onClose={handleClose} className={classes.dailogBox}>
@@ -172,8 +189,8 @@ const AddFormDialog = ({selectedData}) => {
                   />
                 </Grid>
                 <Grid item xs={6}>
-                  <TextField
-                      autoFocus
+                  {/* <TextField
+                    autoFocus
                     margin="dense"
                     id="language"
                     label="Language"
@@ -182,10 +199,31 @@ const AddFormDialog = ({selectedData}) => {
                     variant="standard"
                     value={language}
                     onChange={(e) => setLanguage(e.target.value)}
-                  />
+                  /> */}
+                  <FormControl fullWidth>
+                    <InputLabel id="language-label">Language</InputLabel>
+                    <Select
+                      labelId="language-label"
+                      id="language"
+                      // multiple
+                      value={language}
+                      onChange={(e) => setLanguage(e.target.value)}
+                      input={<OutlinedInput label="Language" />}
+                    >
+                      {languageList.map((name, idx) => (
+                        <MenuItem
+                          key={name}
+                          value={name}
+                          // style={getStyles(name, personName, theme)}
+                        >
+                          {name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
                 </Grid>
 
-                <Grid item xs={6}>
+                {/* <Grid item xs={6}>
                   <TextField
                     autoFocus
                     margin="dense"
@@ -197,18 +235,42 @@ const AddFormDialog = ({selectedData}) => {
                     value={genre}
                     onChange={(e) => setGenre(e.target.value)}
                   />
+                  </Grid>*/}
+                <Grid item xs={6}>
+                  <FormControl fullWidth>
+                    <InputLabel id="genre-label">Genre</InputLabel>
+                    <Select
+                      labelId="genre-label"
+                      id="genre"
+                      // multiple
+                      value={genre}
+                      onChange={(e) => setGenre(e.target.value)}
+                      input={<OutlinedInput label="Genre" />}
+                    >
+                      {genreList.map((name, idx) => (
+                        <MenuItem
+                          key={name}
+                          value={name}
+                          // style={getStyles(name, personName, theme)}
+                        >
+                          {name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
                 </Grid>
+
                 <Grid item xs={6}>
                   <TextField
                     autoFocus
                     margin="dense"
                     id="publishedDate"
-                    label="Published Date"
+                    // label="Published Date"
                     type="date"
                     fullWidth
                     variant="standard"
                     value={publishedDate}
-                    onChange={(e) => setPublishedDate(e.target.value)}
+                    onChange={handleDate}
                   />
                 </Grid>
               </Grid>

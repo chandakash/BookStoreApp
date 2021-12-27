@@ -49,12 +49,12 @@ const NavigationBar = () => {
           </div>
 
           <div>
-            <Link to="/book" style={{ textDecoration: "none" }}>
+            <Link to="/userlist" style={{ textDecoration: "none" }}>
               <Button
                 variant="contained"
                 style={{ marginLeft: "1rem", marginRight: "1rem" }}
               >
-                Book
+                USERLIST
               </Button>
             </Link>
             <Link to="/booklist" style={{ textDecoration: "none" }}>

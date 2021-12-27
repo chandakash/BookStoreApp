@@ -15,16 +15,30 @@ import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import Checkbox from "@mui/material/Checkbox";
 import IconButton from "@mui/material/IconButton";
-import Tooltip from "@mui/material/Tooltip";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
-import DeleteIcon from "@mui/icons-material/Delete";
-import FilterListIcon from "@mui/icons-material/FilterList";
 import { visuallyHidden } from "@mui/utils";
 import headCells from "../utils/tableHeads";
 import { useState } from "react";
 import { useEffect } from "react";
 import BookService from "../services/BookService";
+import { InputBase } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
+import { makeStyles } from "@mui/styles";
+import { useCallback } from "react";
+
+const useStyles = makeStyles((theme) => ({
+  searchpaper: {
+    backgroundColor: theme.palette.primary.dark,
+    height: "30px",
+    marginLeft: theme.spacing(1),
+    padding: "2px 4px",
+    display: "flex",
+    alignItems: "center",
+    width: 200,
+    border: `1px solid ${theme.palette.secondary.main}`,
+  },
+}));
 
 function EnhancedTableHead(props) {
   const {
@@ -41,7 +55,7 @@ function EnhancedTableHead(props) {
 
   return (
     <TableHead>
-      <TableRow style={{background:"gray"}}>
+      <TableRow style={{ background: "gray"}}>
         <TableCell padding="checkbox">
           <Checkbox
             color="primary"
@@ -57,7 +71,7 @@ function EnhancedTableHead(props) {
           <TableCell
             key={headCell.id}
             // align={headCell.numeric ? "right" : "left"}
-            align ={"center"}
+            align={"center"}
             padding={headCell.disablePadding ? "none" : "normal"}
             sortDirection={orderBy === headCell.id ? order : false}
           >
@@ -90,7 +104,45 @@ EnhancedTableHead.propTypes = {
 };
 
 const EnhancedTableToolbar = (props) => {
-  const { numSelected } = props;
+  const { numSelected, setRows, setTotalPage, setTotalCount } = props;
+  const [searchBy, setSearchBy] = useState("Akash Chand");
+  const classes = useStyles();
+
+  const debounce = (func) => {
+    let timer;
+    return function (...args) {
+      const context = this;
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => {
+        timer = null;
+        func.apply(context, args);
+      }, 1000);
+    };
+  };
+  const handleSearch = async (e) => {
+    try {
+      const fetchData = async () => {
+        // const response = await axios.get(`${SERVER_URL}/${ROLL_NUMBER}/SearchData?DocId=${e.target.value}`)
+        // console.log(searchBy);
+        setSearchBy(e.target.value);
+        var response;
+        if(e.target.value!==""){
+          response = await BookService.getFilterData(e.target.value);
+        }else{
+          response = await BookService.getAll(0,5,"asc","title")
+        }
+        // console.log(response);
+        setTotalPage(response.data.totalPages);
+        setTotalCount(response.data.totalElements);
+        setRows(response.data.content);
+      };
+      fetchData();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const optimisedSearch = useCallback(debounce(handleSearch), []);
 
   return (
     <Toolbar
@@ -106,25 +158,36 @@ const EnhancedTableToolbar = (props) => {
         }),
       }}
     >
-      {numSelected > 0 ? (
-        <Typography
-          sx={{ flex: "1 1 100%" }}
-          color="inherit"
-          variant="subtitle1"
-          component="div"
+      <Typography
+        sx={{ flex: "1 1 100%" }}
+        variant="h6"
+        id="tableTitle"
+        component="div"
+      >
+        BOOK LIST
+      </Typography>
+      <Paper
+        component="form"
+        className={classes.searchpaper}
+        // alignItems="center"
+      >
+        <InputBase
+          className={classes.input}
+          placeholder="Search..."
+          inputProps={{
+            "aria-label": "Search by Any",
+            size: "small",
+          }}
+          onChange={optimisedSearch}
+        />
+        <IconButton
+          type="submit"
+          // className={classes.iconButton}
+          aria-label="search"
         >
-          {numSelected} selected
-        </Typography>
-      ) : (
-        <Typography
-          sx={{ flex: "1 1 100%" }}
-          variant="h6"
-          id="tableTitle"
-          component="div"
-        >
-          BOOK LIST
-        </Typography>
-      )}
+          <SearchIcon color="primary" fontSize="small" />
+        </IconButton>
+      </Paper>
     </Toolbar>
   );
 };
@@ -133,8 +196,7 @@ EnhancedTableToolbar.propTypes = {
   numSelected: PropTypes.number.isRequired,
 };
 
-export default function EnhancedTable({selectedData,setSelectedData}) {
-
+export default function EnhancedTable({ selectedData, setSelectedData }) {
   const [rows, setRows] = useState([]);
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState("title");
@@ -144,7 +206,6 @@ export default function EnhancedTable({selectedData,setSelectedData}) {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [totalPage, setTotalPage] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
-  const [searchBy, setSearchBy] = useState("title");
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
@@ -152,32 +213,31 @@ export default function EnhancedTable({selectedData,setSelectedData}) {
     setOrderBy(property);
   };
 
-
-
   const fetchData = async () => {
-    try{
+    try {
       const result = await BookService.getAll(
         page,
         rowsPerPage,
         order,
-        orderBy,
+        orderBy
       );
-        console.log(result);
-        setTotalPage(result.data.totalPages)
-        setTotalCount(result.data.totalElements)
-        setRows(result.data.content);
-    }catch(error){
+      setTotalPage(result.data.totalPages);
+      setTotalCount(result.data.totalElements);
+      setRows(result.data.content);
+    } catch (error) {
       console.log(error.response.data.message);
     }
-  }
+  };
 
   useEffect(() => {
     fetchData();
+
+    return () => {};
   }, []);
 
-  useEffect(() =>{
+  useEffect(() => {
     fetchData();
-  }, [page,rowsPerPage,order,orderBy])
+  }, [page, rowsPerPage, order, orderBy]);
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
@@ -207,15 +267,16 @@ export default function EnhancedTable({selectedData,setSelectedData}) {
     }
 
     setSelected(newSelected);
-      console.log("row : ",row)
+    console.log("row : ", row);
 
-      // to find the selected data.
-      if(selectedData.find(element => element.bookId === row.bookId)){
-        setSelectedData(selectedData.filter(element => element.bookId !== row.bookId));
-      }else{
-        setSelectedData(selectedData => [...selectedData,row]);
-      }
-      
+    // to find the selected data.
+    if (selectedData.find((element) => element.bookId === row.bookId)) {
+      setSelectedData(
+        selectedData.filter((element) => element.bookId !== row.bookId)
+      );
+    } else {
+      setSelectedData((selectedData) => [...selectedData, row]);
+    }
   };
 
   const handleChangePage = (event, newPage) => {
@@ -233,14 +294,20 @@ export default function EnhancedTable({selectedData,setSelectedData}) {
 
   const isSelected = (bookId) => selected.indexOf(bookId) !== -1;
   return (
-    <Box sx={{ width: "100%" }} style={{ padding:"0px 100px"}}>
-      <Paper sx={{ width: "100%"}} style={{background:"cyan"}}>
-        <EnhancedTableToolbar numSelected={selected.length} />
+    <Box sx={{ width: "100%" }} style={{ padding: "0px 20px" }}>
+      <Paper sx={{ width: "100%" }} style={{ background: "cyan" }}>
+        <EnhancedTableToolbar
+          numSelected={selected.length}
+          setRows={setRows}
+          setTotalPage={setTotalPage}
+          setTotalCount={setTotalCount}
+        />
         <TableContainer>
           <Table
-            sx={{ minWidth: 750 }}
+            // sx={{ minWidth: 750}}
             aria-labelledby="tableTitle"
             size={dense ? "small" : "medium"}
+            style={{ height: "45vh", display: "block", overflow: "scroll"}}
           >
             <EnhancedTableHead
               numSelected={selected.length}
@@ -248,51 +315,58 @@ export default function EnhancedTable({selectedData,setSelectedData}) {
               orderBy={orderBy}
               onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
-              rowCount={rows.length}
+              rowCount={rows ? rows.length : 0}
             />
             <TableBody>
               {rows.map((row, index) => {
-                  const isItemSelected = isSelected(row.bookId);
-                  const labelId = `enhanced-table-checkbox-${index}`;
+                const isItemSelected = isSelected(row.bookId);
+                const labelId = `enhanced-table-checkbox-${index}`;
 
-                  return (
-                    <TableRow
-                      hover
-                      onClick={(event) => handleClick(event, row)}
-                      role="checkbox"
-                      aria-checked={isItemSelected}
-                      tabIndex={-1}
-                      key={row.bookId}
-                      selected={isItemSelected}
+                return (
+                  <TableRow
+                    hover
+                    onClick={(event) => handleClick(event, row)}
+                    role="checkbox"
+                    aria-checked={isItemSelected}
+                    tabIndex={-1}
+                    key={row.bookId}
+                    selected={isItemSelected}
+                  >
+                    <TableCell padding="checkbox">
+                      <Checkbox
+                        color="primary"
+                        checked={isItemSelected}
+                        inputProps={{
+                          "aria-labelledby": labelId,
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell
+                      component="th"
+                      id={labelId}
+                      scope="row"
+                      padding="none"
+                      align="left"
                     >
-                      <TableCell padding="checkbox">
-                        <Checkbox
-                          color="primary"
-                          checked={isItemSelected}
-                          inputProps={{
-                            "aria-labelledby": labelId,
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell
-                        component="th"
-                        id={labelId}
-                        scope="row"
-                        padding="none"
-                        align="left"
+                      {row.title}
+                    </TableCell>
+                    <TableCell align="left">{row.author}</TableCell>
+                    <TableCell align="left">
+                      <a
+                        href={row.coverPhotoURL}
+                        target="black"
+                        style={{ textDecoration: "none" }}
                       >
-                        {row.title}
-                      </TableCell>
-                      <TableCell align="left">{row.author}</TableCell>
-                      <TableCell align="left">{row.coverPhotoURL}</TableCell>
-                      <TableCell align="left">{row.isbnNumber}</TableCell>
-                      <TableCell align="left">{row.language}</TableCell>
-                      <TableCell align="left">{row.genre}</TableCell>
-                      <TableCell align="left">{row.publishedDate}</TableCell>
-                    </TableRow>
-                  );
-                })}
-              
+                        {row.coverPhotoURL}
+                      </a>
+                    </TableCell>
+                    <TableCell align="left">{row.isbnNumber}</TableCell>
+                    <TableCell align="left">{row.language}</TableCell>
+                    <TableCell align="left">{row.genre}</TableCell>
+                    <TableCell align="left">{row.publishedDate}</TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </TableContainer>

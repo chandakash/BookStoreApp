@@ -89,9 +89,9 @@ export default function DeleteDialogForm({selectedData}) {
     <>
       
       <Button
-        variant="outlined"
-        color="primary"
-        size="small"
+        variant={selectedData.length===1 ? 'contained' : 'outlined'}
+        color={selectedData.length ===1 ? 'secondary' : 'primary'}
+        style={{width: "500"}}
         // className={classes.deletemain}
         onClick={handleClickOpen}
         disabled = {selectedData.length ===1 ? false : true}
