@@ -1,3 +1,3 @@
 export * from "../redux/user/userActions";
-// export * from "./user/auth/authActions";
-// export * from "./book/bookActions";
+export * from "../redux/auth/authActions";
+export * from "../redux/book/bookActions";

@@ -57,6 +57,7 @@ export const deleteBook = (bookId) => {
     axios
       .delete("http://localhost:8081/rest/books/" + bookId)
       .then((response) => {
+        console.log(response);
         dispatch(bookSuccess(response.data));
       })
       .catch((error) => {
@@ -102,6 +103,7 @@ export const fetchLanguages = () => {
 };
 
 export const fetchGenres = () => {
+  console.log("fetchGenre")
   return (dispatch) => {
     dispatch({
       type: BT.FETCH_GENRES_REQUEST,
@@ -109,6 +111,7 @@ export const fetchGenres = () => {
     axios
       .get("http://localhost:8081/rest/books/genres")
       .then((response) => {
+        console.log(response);
         dispatch({
           type: BT.GENRES_SUCCESS,
           payload: response.data,
@@ -122,3 +125,29 @@ export const fetchGenres = () => {
       });
   };
 };
+
+export const fetchAllBooks = () => {
+  return (dispatch) => {
+    dispatch({
+      type: BT.FETCH_ALL_BOOKS,
+    });
+    axios.get("https://api.npoint.io/f7ac546d4326b89f90ea")
+      .then((response) => {
+        dispatch({
+          type: BT.BOOK_SUCCESS,
+          payload: response.data,
+        });
+      })
+      .catch((error) => {
+        dispatch({
+          type: BT.BOOK_FAILURE,
+          payload: error,
+        })
+      })
+  }
+};
+
+export const addSelectedItem = data => ({
+  type: BT.ADD_SELECTED_ROW,
+  payload : data
+});

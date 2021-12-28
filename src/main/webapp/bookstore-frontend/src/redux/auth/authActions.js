@@ -4,6 +4,7 @@ import axios from "axios";
 const AUTH_URL = "http://localhost:8081/rest/user/authenticate";
 
 export const authenticateUser = (email, password) => async (dispatch) => {
+  // console.log("user auth")
   dispatch(loginRequest());
   try {
     const response = await axios.post(AUTH_URL, {

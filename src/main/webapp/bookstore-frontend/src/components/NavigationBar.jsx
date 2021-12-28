@@ -3,6 +3,8 @@ import BookIcon from "@mui/icons-material/Book";
 import { makeStyles } from "@mui/styles";
 import React from "react";
 import { Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { logoutUser } from "../services/index";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -16,7 +18,7 @@ const useStyles = makeStyles((theme) => ({
     // margin: "-1rem 5px",
     backgroundColor: "white",
     color: "red",
-    marginRight:"1rem"
+    marginRight: "1rem",
   },
   toolbar: {
     display: "flex",
@@ -26,14 +28,52 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const headerStyle = {
-    display:"flex",
-    flexDirection: "row",
-    alignItems:"center",
-    // color:"red"
-}
+  display: "flex",
+  flexDirection: "row",
+  alignItems: "center",
+  // color:"red"
+};
 
 const NavigationBar = () => {
   const classes = useStyles();
+  const auth = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+
+  const logout = () => {
+    dispatch(logoutUser());
+  };
+
+  const guestLinks = (
+    <>
+      <Link to="/login" style={{ textDecoration: "none" }}>
+        <Button
+          variant="contained"
+          style={{ marginLeft: "1rem", marginRight: "1rem" }}
+        >
+          LOGIN
+        </Button>
+      </Link>
+      <Link to="/register" style={{ textDecoration: "none",marginRight:"1rem"}}>
+        <Button variant="contained">REGISTER</Button>
+      </Link>
+    </>
+  );
+
+  const userLinks = (
+    <>
+      <Link to="/userlist" style={{ textDecoration: "none" }}>
+        <Button
+          variant="contained"
+          style={{ marginLeft: "1rem", marginRight: "1rem" }}
+        >
+          USERLIST
+        </Button>
+      </Link>
+      <Link to="/booklist" style={{ textDecoration: "none" }}>
+        <Button variant="contained">BookList</Button>
+      </Link>
+    </>
+  );
 
   return (
     <div className={classes.root}>
@@ -46,27 +86,16 @@ const NavigationBar = () => {
             <Typography variant="h6" component="div" marginRight="10px">
               BOOK STORE
             </Typography>
+            {/* {auth.isloggedIn ? userLinks : null} */}
+            {auth.isloggedIn ? null : userLinks}
           </div>
-
           <div>
-            <Link to="/userlist" style={{ textDecoration: "none" }}>
-              <Button
-                variant="contained"
-                style={{ marginLeft: "1rem", marginRight: "1rem" }}
-              >
-                USERLIST
-              </Button>
-            </Link>
-            <Link to="/booklist" style={{ textDecoration: "none" }}>
-              <Button variant="contained">BookList</Button>
-            </Link>
-            <Button
-              variant="contained"
-              style={{ marginLeft: "1rem", marginRight: "1rem" }}
-            >
-              LOGIN
-            </Button>
-            <Button variant="contained">REGISTER</Button>
+            {auth.isloggedIn ? null : guestLinks}
+            {auth.isloggedIn ? null : (
+              <Link to="/" style={{ textDecoration: "none" }}>
+                <Button variant="contained" onClick={logout}>Logout</Button>
+              </Link>
+            )}
           </div>
         </Toolbar>
       </AppBar>

@@ -6,7 +6,8 @@ import DeleteDialogForm from "../components/DeleteFormDialog";
 import EditFormDialog from "../components/EditFormDialog";
 import EnhancedTable from "../components/Table";
 import BookService from "../services/BookService";
-
+// import { connect } from "react-redux";
+// import { fetchLanguages, fetchGenres } from "../services/index";
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -25,7 +26,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 const BookList = () => {
   const classes = useStyles();
-  const [selectedData, setSelectedData] = useState([]);
   const [genreList, setGenreList] = useState([]);
   const [languageList, setLanguageList] = useState([]);
 
@@ -56,14 +56,13 @@ const BookList = () => {
       console.log(error.response.data.message);
     }
   };
-
   useEffect(() => {
     fetchGenreList();
     fetchLanguageList();
 
     return () => {};
   }, []);
-
+  
   return (
     <Paper
       elevation={3}
@@ -89,31 +88,32 @@ const BookList = () => {
             xs={3}
             justify="flex-end"
             className={classes.rightBtns}
-
           >
-            <AddFormDialog
-              selectedData={selectedData}
-              languageList={languageList}
-              genreList={genreList}
-            />
+            <AddFormDialog languageList={languageList} genreList={genreList} />
 
-            <EditFormDialog
-              selectedData={selectedData}
-              languageList={languageList}
-              genreList={genreList}
-            />
+            <EditFormDialog languageList={languageList} genreList={genreList} />
 
-            <DeleteDialogForm selectedData={selectedData} />
+            <DeleteDialogForm />
           </Grid>
         </Grid>
       </Grid>
 
-      <EnhancedTable
-        selectedData={selectedData}
-        setSelectedData={setSelectedData}
-      />
+      <EnhancedTable />
     </Paper>
   );
 };
+
+// const mapStateToProps = (state) => {
+//   return {
+//       savedBookObject : state.book
+//   };
+// }
+
+// const mapDispatchToProps = (dispatch) => {
+//   return {
+//     fetchGenreList: () => dispatch(fetchGenres()),
+//     fetchLanguageList: () => dispatch(fetchLanguages()),
+//   };
+// };
 
 export default BookList;

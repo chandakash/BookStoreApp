@@ -26,6 +26,10 @@ import { InputBase } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { makeStyles } from "@mui/styles";
 import { useCallback } from "react";
+import { connect } from "react-redux";
+import {addSelectedItem} from '../services/index'
+import axios from "axios";
+
 
 const useStyles = makeStyles((theme) => ({
   searchpaper: {
@@ -196,7 +200,7 @@ EnhancedTableToolbar.propTypes = {
   numSelected: PropTypes.number.isRequired,
 };
 
-export default function EnhancedTable({ selectedData, setSelectedData }) {
+const EnhancedTable = ({ selectedData, addSelectedData }) => {
   const [rows, setRows] = useState([]);
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState("title");
@@ -221,6 +225,7 @@ export default function EnhancedTable({ selectedData, setSelectedData }) {
         order,
         orderBy
       );
+      // const result = await axios.get("https://api.npoint.io/f7ac546d4326b89f90ea");
       setTotalPage(result.data.totalPages);
       setTotalCount(result.data.totalElements);
       setRows(result.data.content);
@@ -270,13 +275,14 @@ export default function EnhancedTable({ selectedData, setSelectedData }) {
     console.log("row : ", row);
 
     // to find the selected data.
-    if (selectedData.find((element) => element.bookId === row.bookId)) {
-      setSelectedData(
-        selectedData.filter((element) => element.bookId !== row.bookId)
-      );
-    } else {
-      setSelectedData((selectedData) => [...selectedData, row]);
-    }
+    // if (selectedData.find((element) => element.bookId === row.bookId)) {
+    //   setSelectedData(
+    //     selectedData.filter((element) => element.bookId !== row.bookId)
+    //   );
+    // } else {
+    //   setSelectedData((selectedData) => [...selectedData, row]);
+    // }
+    addSelectedData(row); // calling dispatch method.
   };
 
   const handleChangePage = (event, newPage) => {
@@ -387,3 +393,17 @@ export default function EnhancedTable({ selectedData, setSelectedData }) {
     </Box>
   );
 }
+
+const mapStateToProps = (state) => {
+  return {
+      selectedData : state.selectedData,
+  };
+}
+
+const mapDispatchToProps = dispatch => {
+  return{
+    addSelectedData : (row) => dispatch(addSelectedItem(row)),
+  }
+};
+
+export default connect(mapStateToProps,mapDispatchToProps)(EnhancedTable);

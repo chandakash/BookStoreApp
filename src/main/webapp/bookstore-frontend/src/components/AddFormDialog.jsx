@@ -12,11 +12,12 @@ import {
   TextField,
 } from "@mui/material";
 import { makeStyles } from "@mui/styles";
-import React, {useState } from "react";
+import React, {useEffect, useState } from "react";
 import BookService from "../services/BookService";
 import AddIcon from "@mui/icons-material/Add";
 import MenuItem from "@mui/material/MenuItem";
-
+import { connect } from "react-redux";
+import {saveBook} from '../services/index'
 const useStyles = makeStyles((theme) => ({
   root: {
     backgroundColor: theme.palette.primary.dark,
@@ -42,7 +43,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const AddFormDialog = ({ selectedData, genreList, languageList }) => {
+const AddFormDialog = ({ selectedData,languageList, genreList, saveBook}) => {
   const [open, setOpen] = useState(false);
 
   const [title, setTitle] = useState("");
@@ -55,12 +56,14 @@ const AddFormDialog = ({ selectedData, genreList, languageList }) => {
   const [publishedDate, setPublishedDate] = useState("");
 
   const handleClickOpen = () => {
+
     setOpen(true);
   };
 
   const handleClose = () => {
     setOpen(false);
   };
+
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -74,26 +77,25 @@ const AddFormDialog = ({ selectedData, genreList, languageList }) => {
       genre: genre[0],
       publishedDate: publishedDate,
     };
-    BookService.create(data)
-      .then((response) => {
-        console.log(response.data);
-        handleClose();
-      })
-      .catch((e) => {
-        console.log(e);
-        handleClose();
-      });
 
-    // alert("for submitted successfully");
+    saveBook(data);
+    handleClose();
+    // BookService.create(data)
+    //   .then((response) => {
+    //     console.log(response.data);
+    //     handleClose();
+    //   })
+    //   .catch((e) => {
+    //     console.log(e);
+    //     handleClose();
+    //   });
+
   };
 
   const handleDate = (event) => {
-    console.log("handle Date : ");
-    console.log(event.target.value);
     setPublishedDate(event.target.value)
   }
   const classes = useStyles();
-
   return (
     <>
       <Button
@@ -189,17 +191,6 @@ const AddFormDialog = ({ selectedData, genreList, languageList }) => {
                   />
                 </Grid>
                 <Grid item xs={6}>
-                  {/* <TextField
-                    autoFocus
-                    margin="dense"
-                    id="language"
-                    label="Language"
-                    type="text"
-                    fullWidth
-                    variant="standard"
-                    value={language}
-                    onChange={(e) => setLanguage(e.target.value)}
-                  /> */}
                   <FormControl fullWidth>
                     <InputLabel id="language-label">Language</InputLabel>
                     <Select
@@ -222,20 +213,6 @@ const AddFormDialog = ({ selectedData, genreList, languageList }) => {
                     </Select>
                   </FormControl>
                 </Grid>
-
-                {/* <Grid item xs={6}>
-                  <TextField
-                    autoFocus
-                    margin="dense"
-                    id="genre"
-                    label="Genre"
-                    type="text"
-                    fullWidth
-                    variant="standard"
-                    value={genre}
-                    onChange={(e) => setGenre(e.target.value)}
-                  />
-                  </Grid>*/}
                 <Grid item xs={6}>
                   <FormControl fullWidth>
                     <InputLabel id="genre-label">Genre</InputLabel>
@@ -286,4 +263,12 @@ const AddFormDialog = ({ selectedData, genreList, languageList }) => {
   );
 };
 
-export default AddFormDialog;
+const mapStateToProps = ({book : {selectedData}}) => ({
+  selectedData,
+})
+const mapDispatchToProps = dispatch => {
+  return {
+    saveBook : (book) => dispatch(saveBook(book)),
+  }
+}
+export default connect(mapStateToProps,mapDispatchToProps)(AddFormDialog);

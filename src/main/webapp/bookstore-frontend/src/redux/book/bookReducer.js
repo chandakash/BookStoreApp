@@ -1,8 +1,16 @@
 import * as BT from "./bookTypes";
+import {addSelectedData} from './bookUtils';
 
 const initialState = {
   book: "",
   error: "",
+  selectedData:[],
+  rows: [],
+  currentPage: 0,
+  totalDataCount: 0,
+  searchText: "",
+  languageList:[],
+  genreList:[],
 };
 
 const reducer = (state = initialState, action) => {
@@ -13,37 +21,46 @@ const reducer = (state = initialState, action) => {
     case BT.DELETE_BOOK_REQUEST:
     case BT.FETCH_LANGUAGES_REQUEST:
     case BT.FETCH_GENRES_REQUEST:
+    case BT.FETCH_ALL_BOOKS:
       return {
         ...state,
       };
+    case BT.ADD_SELECTED_ROW:{
+      return {
+        ...state,
+        selectedData : addSelectedData(state.selectedData,action.payload)
+      }
+    }
     case BT.BOOK_SUCCESS:
       return {
-        book: action.payload,
-        error: "",
+        // book: action.payload,
+        ...state,
+        rows: [...state.rows,action.payload]
       };
     case BT.BOOK_FAILURE:
       return {
-        book: "",
+        ...state,
         error: action.payload,
       };
     case BT.LANGUAGES_SUCCESS:
       return {
-        languages: action.payload,
+        ...state,
+        languageList: action.payload,
         error: "",
       };
     case BT.LANGUAGES_FAILURE:
       return {
-        languages: "",
+        languageList: [],
         error: action.payload,
       };
     case BT.GENRES_SUCCESS:
       return {
-        genres: action.payload,
+        genreList: action.payload,
         error: "",
       };
     case BT.GENRES_FAILURE:
       return {
-        genres: "",
+        genreList: [],
         error: action.payload,
       };
     default:

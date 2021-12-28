@@ -16,6 +16,7 @@ import { makeStyles } from "@mui/styles";
 import React, { useState } from "react";
 import BookService from "../services/BookService";
 import EditIcon from "@mui/icons-material/Edit";
+import { connect } from "react-redux";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -49,8 +50,8 @@ const EditFormDialog = ({ selectedData, genreList, languageList }) => {
   const [coverPhotoUrl, setCoverPhotoUrl] = useState("");
   const [isbn, setIsbn] = useState("");
   const [price, setPrice] = useState(0.0);
-  const [language, setLanguage] = useState([]);
-  const [genre, setGenre] = useState([]);
+  const [language, setLanguage] = useState("English");
+  const [genre, setGenre] = useState("Horror");
   const [publishedDate, setPublishedDate] = useState("");
   const [bookId, setBookId] = useState(-1);
 
@@ -266,4 +267,15 @@ const EditFormDialog = ({ selectedData, genreList, languageList }) => {
   );
 };
 
-export default EditFormDialog;
+// const mapStateToProps = state => {
+//   return {
+//     selectedData : state.selectedData
+//   }
+// }
+const mapStateToProps = ({book : {selectedData}}) => ({
+  selectedData,
+})
+// const mapDispatchToProps = (dispatch) => ({
+//   addItem : item => dispatch(addItemFromAction(item));
+// })
+export default connect(mapStateToProps,null)(EditFormDialog);
